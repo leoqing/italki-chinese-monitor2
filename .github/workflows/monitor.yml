@@ -1,0 +1,27 @@
+name: Monitor italki Chinese
+
+on:
+  schedule:
+    - cron: '0 12 * * 0'    # 每周日 20:00 北京时间 (UTC 12:00)
+    - cron: '0 1 * * 1'     # 每周一 09:00 北京时间 (UTC 01:00)
+    - cron: '0 16 * * 1'    # 每周一 额外检查 (UTC 08:00，保险)
+  workflow_dispatch:         # 允许手动触发
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: pip install requests
+    - name: Run monitor
+      env:
+        SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
+        SERVER_CHAN_KEY: ${{ secrets.SERVER_CHAN_KEY }}
+      run: python monitor.py
